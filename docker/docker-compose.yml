@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  namenode:
+    image: apache/hadoop:3
+    container_name: hadoop-namenode
+    hostname: namenode
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+      - ../:/workspace
+    networks:
+      - hadoop-network
+    command: >
+      bash -c "
+        hdfs namenode -format -force -nonInteractive &&
+        hdfs namenode
+      "
+
+  datanode:
+    image: apache/hadoop:3
+    container_name: hadoop-datanode
+    hostname: datanode
+    depends_on:
+      - namenode
+    ports:
+      - "9864:9864"
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - SERVICE_PRECONDITION=namenode:9870
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+      - ../:/workspace
+    networks:
+      - hadoop-network
+    command: hdfs datanode
+
+  resourcemanager:
+    image: apache/hadoop:3
+    container_name: hadoop-resourcemanager
+    hostname: resourcemanager
+    depends_on:
+      - namenode
+      - datanode
+    ports:
+      - "8088:8088"
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - SERVICE_PRECONDITION=namenode:9870 datanode:9864
+    volumes:
+      - ../:/workspace
+    networks:
+      - hadoop-network
+    command: yarn resourcemanager
+
+  nodemanager:
+    image: apache/hadoop:3
+    container_name: hadoop-nodemanager
+    hostname: nodemanager
+    depends_on:
+      - resourcemanager
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 resourcemanager:8088
+    volumes:
+      - ../:/workspace
+    networks:
+      - hadoop-network
+    command: yarn nodemanager
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:
+
+networks:
+  hadoop-network:
+    driver: bridge

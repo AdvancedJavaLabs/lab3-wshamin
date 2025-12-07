@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.itmo.lab3'
+version = '1.0-SNAPSHOT'
+
+java {
+    // Используем Java 8 для совместимости с образом apache/hadoop:3
+    // Для использования Java 21 нужно использовать другой образ Hadoop с поддержкой Java 21
+    // или настроить контейнер с Java 21 вручную
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Hadoop dependencies
+    implementation 'org.apache.hadoop:hadoop-client:3.3.6'
+    implementation 'org.apache.hadoop:hadoop-common:3.3.6'
+    implementation 'org.apache.hadoop:hadoop-hdfs:3.3.6'
+    implementation 'org.apache.hadoop:hadoop-mapreduce-client-core:3.3.6'
+    implementation 'org.apache.hadoop:hadoop-mapreduce-client-jobclient:3.3.6'
+}
+
+application {
+    mainClass = 'com.itmo.lab3.SalesAnalysisJob'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.itmo.lab3.SalesAnalysisJob'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
