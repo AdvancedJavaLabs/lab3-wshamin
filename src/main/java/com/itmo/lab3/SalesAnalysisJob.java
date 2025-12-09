@@ -21,7 +21,7 @@ public class SalesAnalysisJob {
         }
 
         if (args.length - argIndex < 2) {
-            System.err.println("Использование: SalesAnalysisJob <input path> <output path> [num mappers] [num reducers]");
+            System.err.println("Using: SalesAnalysisJob <input path> <output path> [num mappers] [num reducers]");
             System.exit(2);
         }
         
@@ -37,7 +37,7 @@ public class SalesAnalysisJob {
                 numMappers = Integer.parseInt(args[argIndex + 2]);
                 conf.setInt("mapreduce.job.maps", numMappers);
             } catch (NumberFormatException e) {
-                System.err.println("Ошибка: неверный формат числа mappers: " + args[argIndex + 2]);
+                System.err.println("Error: number format exception for mappers: " + args[argIndex + 2]);
                 System.exit(2);
             }
         }
@@ -47,12 +47,12 @@ public class SalesAnalysisJob {
                 numReducers = Integer.parseInt(args[argIndex + 3]);
                 conf.setInt("mapreduce.job.reduces", numReducers);
             } catch (NumberFormatException e) {
-                System.err.println("Ошибка: неверный формат числа reducers: " + args[argIndex + 3]);
+                System.err.println("Error: number format exception for reducers: " + args[argIndex + 3]);
                 System.exit(2);
             }
         }
 
-        System.out.println("Запуск Job 1: Агрегация данных по категориям...");
+        System.out.println("Launch Job 1: Data aggregation on category...");
         Job aggregationJob = Job.getInstance(conf, "Sales Analysis - Aggregation");
         aggregationJob.setJarByClass(SalesAnalysisJob.class);
 
@@ -70,23 +70,23 @@ public class SalesAnalysisJob {
         boolean success1 = aggregationJob.waitForCompletion(true);
         
         if (!success1) {
-            System.err.println("Job 1 (агрегация) завершилась с ошибкой");
+            System.err.println("Job 1 (aggregation) ends with error");
             System.exit(1);
         }
         
-        System.out.println("Job 1 завершена успешно");
+        System.out.println("Job 1 done");
 
-        System.out.println("Запуск Job 2: Сортировка результатов по выручке...");
+        System.out.println("Launch Job 2: Sorting results on revenue...");
 
         try {
             FileSystem fs = FileSystem.get(conf);
             Path outputPathObj = new Path(outputPath);
             if (fs.exists(outputPathObj)) {
                 fs.delete(outputPathObj, true);
-                System.out.println("Удалена существующая выходная директория: " + outputPath);
+                System.out.println("Existing output directory deleted: " + outputPath);
             }
         } catch (Exception e) {
-            System.err.println("Предупреждение: не удалось удалить выходную директорию: " + e.getMessage());
+            System.err.println("Warning: cant delete the output dir: " + e.getMessage());
         }
         
         Job sortJob = Job.getInstance(conf, "Sales Analysis - Sort");
@@ -108,24 +108,24 @@ public class SalesAnalysisJob {
         boolean success2 = sortJob.waitForCompletion(true);
         
         if (!success2) {
-            System.err.println("Job 2 (сортировка) завершился с ошибкой");
+            System.err.println("Job 2 (sort) ends with error");
             System.exit(1);
         }
         
-        System.out.println("Job 2 завершен успешно");
+        System.out.println("Job 2 done");
 
         try {
             FileSystem fs = FileSystem.get(conf);
             Path tempPath = new Path(intermediatePath);
             if (fs.exists(tempPath)) {
                 fs.delete(tempPath, true);
-                System.out.println("Временная директория удалена: " + intermediatePath);
+                System.out.println("Temp dir deleted: " + intermediatePath);
             }
         } catch (Exception e) {
-            System.err.println("Предупреждение: не удалось удалить временную директорию: " + e.getMessage());
+            System.err.println("Warning: cant delete the directory: " + e.getMessage());
         }
         
-        System.out.println("Все job завершены успешно. Результаты сохранены в: " + outputPath);
+        System.out.println("All jobs done. Results saved in: " + outputPath);
         
         System.exit(0);
     }
