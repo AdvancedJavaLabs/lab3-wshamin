@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Fixed worker counts
-NUM_MAPPERS=16
-NUM_REDUCERS=16
+NUM_REDUCERS=1
 
 cd docker
 docker compose up -d
@@ -34,7 +33,6 @@ docker exec hadoop-namenode hadoop jar /tmp/sales-analysis.jar \
   com.itmo.lab3.SalesAnalysisJob \
   /input \
   /output/sales-analysis \
-  "${NUM_MAPPERS}" \
   "${NUM_REDUCERS}"
 END_TIME=$(date +%s)
 DURATION_SECONDS=$((END_TIME - START_TIME))
@@ -47,7 +45,6 @@ awk -F',' '{printf "%-20s %15.2f %10s\n", $1, $2, $3}' >> results/sales-results.
 
 {
   echo ""
-  echo "Mappers: ${NUM_MAPPERS}"
   echo "Reducers: ${NUM_REDUCERS}"
   echo "Duration (s): ${DURATION_SECONDS}"
 } >> results/sales-results.txt

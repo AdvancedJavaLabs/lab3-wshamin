@@ -21,7 +21,7 @@ public class SalesAnalysisJob {
         }
 
         if (args.length - argIndex < 2) {
-            System.err.println("Using: SalesAnalysisJob <input path> <output path> [num mappers] [num reducers]");
+            System.err.println("Using: SalesAnalysisJob <input path> <output path> [num reducers]");
             System.exit(2);
         }
         
@@ -29,25 +29,14 @@ public class SalesAnalysisJob {
         String outputPath = args[argIndex + 1];
         String intermediatePath = outputPath + "-temp";
 
-        int numMappers = 2;
         int numReducers = 1;
         
         if (args.length - argIndex >= 3) {
             try {
-                numMappers = Integer.parseInt(args[argIndex + 2]);
-                conf.setInt("mapreduce.job.maps", numMappers);
-            } catch (NumberFormatException e) {
-                System.err.println("Error: number format exception for mappers: " + args[argIndex + 2]);
-                System.exit(2);
-            }
-        }
-        
-        if (args.length - argIndex >= 4) {
-            try {
-                numReducers = Integer.parseInt(args[argIndex + 3]);
+                numReducers = Integer.parseInt(args[argIndex + 2]);
                 conf.setInt("mapreduce.job.reduces", numReducers);
             } catch (NumberFormatException e) {
-                System.err.println("Error: number format exception for reducers: " + args[argIndex + 3]);
+                System.err.println("Error: number format exception for reducers: " + args[argIndex + 2]);
                 System.exit(2);
             }
         }
